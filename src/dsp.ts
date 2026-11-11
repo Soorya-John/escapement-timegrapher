@@ -36,6 +36,7 @@ export class Analyzer {
   private spectral:number[]=[];
   private spectralBeat=-Infinity;
   private recent = 0;
+  private traceOrigin:{t:number;bph:number}|undefined;
   constructor(readonly hz:number, readonly settings:Settings) {}
   push(frame:number, data:Float32Array) {
     if (this.end !== null && this.end !== frame) throw Error(`Audio frames were interrupted (expected ${this.end}, received ${frame}). Restart to acquire a continuous measurement.`);
@@ -139,7 +140,12 @@ export class Analyzer {
     const consistent=lifts.filter(l=>Math.abs(l-center)<=Math.max(0.00025,center*0.065));
     const amplitudeConfidence=consistent.length/Math.max(1,best.chain.length);
     const estimate=valid&&s.mode==='lever'&&amplitudeConfidence>=0.78&&consistent.length>=10?amplitude(s.lift,median(consistent),period):null;
-    const trace:Point[]=valid?best.chain.map((b,i)=>({t:b.t,y:(b.t-best.chain[0].t-best.indices[i]*best.nominal)*1000,parity:best.indices[i]%2})):[];
+    if(valid&&this.traceOrigin?.bph!==best.bph)this.traceOrigin={t:best.chain[0].t,bph:best.bph};
+    const origin=this.traceOrigin?.t??0;
+    const trace:Point[]=valid?best.chain.map(b=>{
+      const relative=b.t-origin,slot=Math.round(relative/best.nominal);
+      return {t:b.t,y:(relative-slot*best.nominal)*1000,parity:((slot%2)+2)%2};
+    }):[];
     return {...common,valid,stale,ambiguous,reasons,bph:valid?best.bph:s.bph||null,rate,beatError,
       amplitude:estimate!==null&&estimate>=90&&estimate<=360?estimate:null, amplitudeConfidence,
       liftMs:consistent.length?median(consistent)*1000:null, confidence:valid?best.score:0,

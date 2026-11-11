@@ -10,6 +10,8 @@ import {el,field,val,btn,say,option,number,optional,fmt,download,notice,error,ta
 let reading:Reading|undefined, history:Session['history']=[], source:Source|undefined;
 let settings:Settings, activeCal:Calibration|null=null, retained=false, starting=false, state='Ready to acquire', lastFrame=0;
 let request=0;
+let trace:Reading['trace']=[],traceBph:number|null=null;
+function redraw(){draw(reading?{...reading,trace}:undefined,history);}
 const acquisition=new Acquisition(onReading,onState,b=>download(b,'escapement-recording.wav','audio/wav'));
 const names={stable:'Stable watch',fast:'Fast watch',slow:'Slow watch',asymmetry:'Increased beat error',noisy:'Noisy recording',missing:'Missing beats',drift:'Gradually changing rate'};
 const orientations=['Face upward, caseback toward the bench.','Face downward on a clean padded support.',
@@ -34,11 +36,11 @@ function page(){
   if(active==='records')refreshRecords();
 }
 window.addEventListener('hashchange',page);
-window.addEventListener('resize',()=>draw(reading,history));
+window.addEventListener('resize',()=>redraw());
 function onState(message:string){
   state=message;
   if(message.includes('after audio gap')){
-    reading=undefined;history=[];
+    reading=undefined;history=[];trace=[];traceBph=null;
     notice('Audio gap detected. Timing and optional recording restarted with a fresh window.');
     if(sequence?.phase==='measure')sequence.phase='settle';
   }
@@ -66,6 +68,12 @@ function onReading(r:Reading){
     return;
   }
   reading=r;
+  if(r.valid){
+    if(traceBph!==r.bph){trace=[];traceBph=r.bph;}
+    const last=trace.at(-1)?.t??-Infinity;
+    trace.push(...r.trace.filter(p=>p.t>last));
+    trace=trace.filter(p=>p.t>=r.elapsed-60);
+  }
   if(!history.length||r.elapsed-history.at(-1)!.t>=0.95){
     history.push({t:r.elapsed,rate:r.rate,beatError:r.beatError});if(history.length>700)history.shift();
   }
@@ -114,7 +122,7 @@ function render(){
   btn('start').disabled=starting||!!sequence;btn('demo').disabled=starting||!!sequence;
   for(const id of ['device','watch','ratepick','custom','lift','seconds','mode','gain','sensitivity','filter','ppm','calpick','record','scenario','audiofile'])
     field(id).disabled=acquisition.active||starting||!!sequence;
-  draw(r,history);
+  redraw();
 }
 async function start(kind:Source,guided=false,file?:File){
   if(sequence&&!guided)return;
@@ -122,7 +130,7 @@ async function start(kind:Source,guided=false,file?:File){
   try{
     settings=readSettings();
     if(kind==='simulation')settings={...settings,ppm:0};
-    reading=undefined;history=[];source=kind;activeCal=null;retained=false;starting=true;state='';
+    reading=undefined;history=[];trace=[];traceBph=null;source=kind;activeCal=null;retained=false;starting=true;state='';
     render();
     if(kind==='simulation')acquisition.demo(settings,val('scenario') as keyof typeof scenarios);
     else if(kind==='import'&&file)await acquisition.imported(file,settings);
@@ -153,14 +161,14 @@ btn('stop').onclick=()=>{
   if(sequence)endSequence('Sequence stopped.');render();
 };
 btn('reset').onclick=()=>{
-  request++;acquisition.stop();reading=undefined;history=[];source=undefined;retained=false;
+  request++;acquisition.stop();reading=undefined;history=[];trace=[];traceBph=null;source=undefined;retained=false;
   starting=false;state='Ready to acquire';if(sequence)endSequence('Sequence reset.');render();
 };
 btn('audioexport').onclick=()=>acquisition.exportAudio();
 field('audiofile').onchange=()=>{
   const f=field('audiofile').files?.[0];field('audiofile').value='';if(f)void start('import',false,f);
 };
-for(const id of ['view','span'])field(id).onchange=()=>draw(reading,history);
+for(const id of ['view','span'])field(id).onchange=()=>redraw();
 btn('chart').onclick=()=>el<HTMLCanvasElement>('trace').toBlob(b=>{if(b)download(b,'escapement-timing-trace.png','image/png');});
 for(const [id,canvas] of [['historyexport','history'],['waveexport','wave']]){
   btn(id).onclick=()=>el<HTMLCanvasElement>(canvas).toBlob(b=>{if(b)download(b,'escapement-'+canvas+'.png','image/png');});
@@ -208,7 +216,7 @@ btn('sequence').onclick=()=>{
   const settle=number('settle'),measure=number('measure');
   if(!(settle>=0&&settle<=600&&measure>=4&&measure<=90)){notice('Settle time must be 0–600 s and measurement time 4–90 s.');return;}
   if(source==='simulation'&&settle+measure>165){notice('Simulation stabilization and measurement must total 165 s or less.');return;}
-  acquisition.stop();reading=undefined;history=[];retained=false;state='Waiting for repositioning';
+  acquisition.stop();reading=undefined;history=[];trace=[];traceBph=null;retained=false;state='Waiting for repositioning';
   sequence={id:crypto.randomUUID(),index:0,settle,measure,phase:'move',kind:source==='simulation'?'simulation':'microphone'};
   nextPosition();
 };

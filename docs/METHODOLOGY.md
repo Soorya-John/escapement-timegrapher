@@ -51,7 +51,7 @@ The score is a heuristic quality measure. It has no probabilistic or metrologica
 
 ## Rate and beat error
 
-The beat grid tracks integer beat indices, including missing slots. Same-parity pairs separated by at least two seconds supply long-baseline slopes. A bounded median of these slopes estimates the measured beat interval P. Alternating acoustic-phase offsets cancel in same-parity differences.
+The beat grid tracks integer beat indices, including missing slots. The live trace retains a fixed acquisition reference across rolling windows and wraps arrival phase at half a nominal beat. The display retains up to 60 seconds of accepted points. Tick/tock colors describe alternating grid lanes and can exchange at a phase wrap. Same-parity pairs separated by at least two seconds supply long-baseline slopes. A bounded median of these slopes estimates the measured beat interval P. Alternating acoustic-phase offsets cancel in same-parity differences.
 
 ~~~text
 rate in seconds/day = 86400 × (P0 / P − 1)

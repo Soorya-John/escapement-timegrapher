@@ -9,6 +9,8 @@ Numerical tolerances below were specified in test assertions before evaluating t
 | Live physical microphone/watch testing | Pending | Full acquisition tested with Chromium's synthetic microphone stream |
 | Independent reference-instrument comparison | Pending | No calibrated timegrapher or independently verified audio clock available |
 
+Latest local execution completed 21 engine/storage/worklet tests and 8 production-browser workflows successfully. The browser suite also passed against the public GitHub Pages deployment. The Windows shell passed secure-origin, renderer isolation, offline demo, reload persistence and synthetic microphone/worklet acquisition checks.
+
 ## Engine acceptance
 
 The unit suite contains independently specified frame-count fixtures as well as parameterized synthetic acoustic recordings.
