@@ -7,7 +7,7 @@ const watch:Profile={id:'fixture',name:'=SUM(1,2)',brand:'A',model:'B',movement:
   bph:28800,lift:52,mode:'lever',rateTolerance:15,beatTolerance:.8,service:'',notes:'',photo:''};
 const row:Session={id:'session',watch:watch.id,watchName:watch.name,date:'2026-11-11T00:00:00Z',source:'simulation',
   position:'Dial up',duration:10,stabilization:0,settings:defaults,calibration:null,device:'Demo',processing:'PCM',sampleRate:48000,
-  result:{valid:true,rate:-5,beatError:.4,amplitude:null,amplitudeConfidence:0,liftMs:null,bph:28800,confidence:1,variability:0},
+  result:{valid:true,uncertainty:1,rate:-5,beatError:.4,amplitude:null,amplitudeConfidence:0,liftMs:null,bph:28800,confidence:1,variability:0},
   history:[{t:9,rate:-5,beatError:.4}],winding:'Unknown',hours:null,temperature:null,notes:'  @HYPERLINK("file")',tags:'',version:'1.0.0',group:'',weight:1};
 test('transactional save, backup, validated merge, duplicates and deletion',async()=>{
   await put('profiles',watch);await put('sessions',row);

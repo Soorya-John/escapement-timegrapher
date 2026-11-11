@@ -14,7 +14,7 @@ export const config=z.object({bph:profile.shape.bph,lift:profile.shape.lift,mode
 export const calibration=z.object({id,device:txt(512),label:txt(150),sampleRate:number(8000,192000),ppm:number(-5000,5000),date,provenance:txt(500).min(1)});
 export const result=z.object({rate:number(-1200,1200).nullable(),beatError:number(0,100).nullable(),
   amplitude:number(90,360).nullable(),amplitudeConfidence:number(0,1),liftMs:number(0,30).nullable(),
-  bph:number(14400,36000).nullable(),confidence:number(0,1),variability:number(0,10000).nullable(),valid:z.boolean()})
+  uncertainty:number(0,10000).nullable().default(null),bph:number(14400,36000).nullable(),confidence:number(0,1),variability:number(0,10000).nullable(),valid:z.boolean()})
   .refine(r=>r.valid ? r.rate!==null&&r.bph!==null&&r.confidence>0 : r.rate===null&&r.beatError===null&&r.amplitude===null&&r.confidence===0);
 const point=z.object({t:number(0,86400),rate:number(-1200,1200).nullable(),beatError:number(0,100).nullable()});
 export const session=z.object({id,watch:id,watchName:txt(120),date,source:z.enum(['microphone','import','simulation']),

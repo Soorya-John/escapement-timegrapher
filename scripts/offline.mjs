@@ -5,10 +5,11 @@ const files=(await readdir('dist',{recursive:true,withFileTypes:true})).filter(e
 const hash=createHash('sha256');
 for(const f of files)hash.update(await readFile('dist/'+f));
 const name='escapement-'+hash.digest('hex').slice(0,16);
-await writeFile('dist/sw.js',`const CACHE=${JSON.stringify(name)};
+await writeFile('dist/sw.js',`const PREFIX="escapement-"+encodeURIComponent(new URL(self.registration.scope).pathname)+"-";
+const CACHE=PREFIX+${JSON.stringify(name)};
 const FILES=${JSON.stringify(files.map(f=>'./'+f))};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('escapement-')&&k!==CACHE).map(k=>caches.delete(k))))));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==CACHE).map(k=>caches.delete(k))))));
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET'||!e.request.url.startsWith(self.registration.scope))return;
   e.respondWith(caches.open(CACHE).then(async c=>{

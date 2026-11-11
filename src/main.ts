@@ -92,8 +92,9 @@ function render(){
   say('traceinfo',r?r.accepted+' matched / '+r.detected+' impulses':'Awaiting input');
   const watch=data.profiles.find(p=>p.id===val('watch'));
   const evidence=r?[...r.reasons]:[];
+  if(source==='microphone'&&acquisition.processing.includes(' enabled'))evidence.push('Input processing remains enabled and can alter acoustic pulse timing.');
   if(r?.valid){
-    evidence.push('Rate fit dispersion '+fmt(r.uncertainty,2)+' s/day, excluding audio-clock error.');
+    evidence.push('Rate-fit uncertainty '+fmt(r.uncertainty,2)+' s/day, excluding audio-clock error.');
     evidence.push('Timing scatter '+fmt(r.variability,1)+' s/day (robust short-interval dispersion).');
     evidence.push(r.amplitude===null?'Amplitude unavailable for this signal or escapement mode.':
       'Lift '+fmt(r.liftMs,2)+' ms · '+Math.round(r.amplitudeConfidence*100)+'% matching signatures.');
@@ -194,7 +195,7 @@ function makeSession(r:Reading,group='',stabilization=0):Session{
     source:source!,position:val('position') as Session['position'],duration:r.elapsed,stabilization,settings:{...settings},
     calibration:activeCal,device:acquisition.device,processing:acquisition.processing,sampleRate:acquisition.hz,
     result:{rate:r.rate,beatError:r.beatError,amplitude:r.amplitude,amplitudeConfidence:r.amplitudeConfidence,liftMs:r.liftMs,
-      bph:r.bph,confidence:r.confidence,variability:r.variability,valid:r.valid},
+      bph:r.bph,confidence:r.confidence,uncertainty:r.uncertainty,variability:r.variability,valid:r.valid},
     history:history.slice(),winding:val('winding'),hours:optional('hours'),temperature:optional('temperature'),
     notes:val('notes'),tags:val('tags'),version:VERSION,group,weight:1};
 }

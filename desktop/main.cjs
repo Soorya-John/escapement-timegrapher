@@ -1,11 +1,12 @@
-const {app,BrowserWindow,protocol,net,dialog}=require('electron');
+const {app,BrowserWindow,protocol,dialog}=require('electron');
 const {join,resolve,sep}=require('node:path');
-const {pathToFileURL}=require('node:url');
+const {readFile}=require('node:fs/promises');
 const origin='escapement://workbench';
 protocol.registerSchemesAsPrivileged([{scheme:'escapement',privileges:{
   standard:true,secure:true,supportFetchAPI:true,codeCache:true
 }}]);
 app.setName('Escapement');
+if(process.env.ESCAPEMENT_TEST_PROFILE)app.setPath('userData',process.env.ESCAPEMENT_TEST_PROFILE);
 const isLocal=value=>{try{const url=new URL(value);return url.protocol==='escapement:'&&url.host==='workbench';}catch{return false;}};
 app.whenReady().then(()=>{
   const directory=resolve(app.isPackaged?join(process.resourcesPath,'workbench'):join(__dirname,'../dist'));
@@ -15,10 +16,11 @@ app.whenReady().then(()=>{
     const path=resolve(directory,'.'+(pathname==='/'?'/index.html':pathname));
     if(!path.startsWith(directory+sep))return new Response('',{status:403});
     try{
-      const file=await net.fetch(pathToFileURL(path).href);
-      const headers=new Headers(file.headers);
+      const content=await readFile(path);
+      const type=path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':path.endsWith('.html')?'text/html':path.endsWith('.svg')?'image/svg+xml':path.endsWith('.png')?'image/png':path.endsWith('.webmanifest')?'application/manifest+json':'application/octet-stream';
+      const headers=new Headers({'Content-Type':type});
       headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'");
-      return new Response(file.body,{headers,status:file.status});
+      return new Response(content,{headers,status:200});
     }catch{return new Response('',{status:404});}
   });
   const win=new BrowserWindow({width:1440,height:970,minWidth:440,minHeight:540,title:'Escapement',

@@ -104,7 +104,9 @@ function renderComparison(){
       fmt(s.result.beatError,2)+' ms · '+fmt(s.result.amplitude,0)+'° · '+Math.round(s.result.confidence*100)+'% confidence':'Rejected timing window'),label);
   });
   const repeats=positions.flatMap(p=>{
-    const values=valid.filter(s=>s.position===p&&s.watch===valid[0]?.watch&&s.source===valid[0]?.source).map(s=>s.result.rate!);
+    const first=valid.find(s=>s.position===p);
+    const values=valid.filter(s=>s.position===p&&s.watch===first?.watch&&s.source===first?.source&&
+      s.result.bph===first?.result.bph&&s.device===first?.device&&s.settings.ppm===first?.settings.ppm&&s.settings.mode===first?.settings.mode).map(s=>s.result.rate!);
     return values.length>1?[p+' repeat spread '+fmt(Math.max(...values)-Math.min(...values),2)+' s/day']:[];
   });
   el('comparebody').replaceChildren(summary,...(missing.length?[node('p','Missing or rejected · '+missing.join(', '))]:[]),
@@ -164,7 +166,7 @@ function showReport(s:Session){
     'Beat error':fmt(s.result.beatError,2)+' ms',Amplitude:s.result.amplitude===null?'Unavailable':fmt(s.result.amplitude,0)+'°',
     'Lift evidence':fmt(s.result.liftMs,2)+' ms · '+Math.round(s.result.amplitudeConfidence*100)+'% signature agreement',
     'Beat rate':String(s.result.bph??'Unavailable'),Confidence:Math.round(s.result.confidence*100)+'% · '+(s.result.valid?'valid':'invalid'),
-    'Timing scatter':fmt(s.result.variability,2)+' s/day',Input:s.device+' · '+s.sampleRate+' Hz',Processing:s.processing,
+    'Rate-fit uncertainty':fmt(s.result.uncertainty,2)+' s/day, excluding unknown clock error','Timing scatter':fmt(s.result.variability,2)+' s/day',Input:s.device+' · '+s.sampleRate+' Hz',Processing:s.processing,
     'Audio clock':fmt(s.settings.ppm,3,true)+' ppm · '+(s.calibration?s.calibration.date+' · '+s.calibration.provenance:s.settings.ppm?'manual correction':'uncalibrated'),
     Settings:[s.settings.mode,s.settings.lift+'° lift',s.settings.seconds+' s integration',s.settings.filter+' Hz filter',s.settings.gain+'× gain',
       s.settings.sensitivity+'× threshold',s.settings.bph?'Manual '+s.settings.bph+' BPH':'Auto BPH'].join(' · '),

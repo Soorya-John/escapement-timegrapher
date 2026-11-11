@@ -55,7 +55,9 @@ Automated Playwright workflows cover
 - Audio import through browser decoding.
 - 390 px mobile layout without page-level horizontal overflow.
 - Service-worker install, offline reload and offline audio import.
-- Denied permission and missing-input messages.
+- Denied permission, missing-input and insecure-context messages.
+- Canceling a pending permission request and releasing a subsequently supplied stream.
+- Quota failures and corrupt imports without false save confirmation.
 - Chromium synthetic microphone input through getUserMedia, AudioWorklet and Worker.
 - Correct worklet and worker asset URLs.
 - Ended microphone tracks after Stop.
@@ -73,7 +75,7 @@ The same browser suite can target the live Pages URL using ESCAPEMENT_URL. The r
 
 Synthetic fixtures cannot establish real-world professional accuracy. The lift gate checks acoustic consistency, which cannot prove event identity. No real-watch amplitude accuracy is established. Microphone bandwidth, ringing, placement, background noise, resampling and unknown clock bias can affect measurements.
 
-The displayed lock score and fit dispersion are heuristic signal-quality and uncertainty indicators. They have no independently calibrated confidence coverage. Low-amplitude hints, position changes and timing instability are prompts to repeat and inspect. They do not identify a component fault.
+The displayed lock score and rate-fit uncertainty are heuristic signal-quality and uncertainty indicators. They have no independently calibrated confidence coverage. Low-amplitude hints, position changes and timing instability are prompts to repeat and inspect. They do not identify a component fault.
 
 Browser-decoded compressed audio can temporarily require additional memory. Imports are restricted by size and readable container duration before decoding, then checked again after decoding. Extremely dense or atypical impulses can defeat the supported acoustic model. Escapement restricts its beat-rate range and exposes invalid or ambiguous states.
 

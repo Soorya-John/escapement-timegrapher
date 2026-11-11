@@ -60,7 +60,7 @@ beat error in milliseconds = 1000 × abs(median(tick→tock) − median(tock→t
 
 Positive rate means fast. The beat-error result uses consecutive occupied intervals from both parity classes, with at least three observations in each. Missing beats do not become long beat-error intervals. Rate-only escapement mode suppresses beat error and amplitude.
 
-Short-cycle robust MAD is displayed as timing scatter in equivalent seconds/day. Long-baseline slope MAD is displayed as fit dispersion. These describe observed estimator scatter, exclude unknown audio-clock bias and are not calibrated coverage intervals. Strong acoustic asymmetry may bias timing even with a stable fit.
+Short-cycle robust MAD is displayed as timing scatter in equivalent seconds/day. Rate-fit uncertainty is the larger of scaled long-baseline slope MAD and one onset-grid time step divided by the integration span, expressed in seconds/day. This adds a sampling-resolution floor. These describe observed estimator scatter, exclude unknown audio-clock bias and are not calibrated coverage intervals. Strong acoustic asymmetry may bias timing even with a stable fit.
 
 Clipping, stale signal, inadequate coverage, inadequate consistency and ambiguous grids invalidate the numerical results. The last stopped window is explicitly labeled as captured rather than live.
 
