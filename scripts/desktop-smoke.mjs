@@ -1,4 +1,4 @@
-import {_electron as electron} from '@playwright/test';
+import {_electron as electron,expect} from '@playwright/test';
 import {resolve,join} from 'node:path';
 import assert from 'node:assert/strict';
 import {mkdtemp,rm,writeFile} from 'node:fs/promises';
@@ -39,9 +39,9 @@ try{
   await page.getByRole('button',{name:'Save session'}).click();
   await page.getByText('Session saved.').waitFor();
   await page.getByRole('link',{name:'Records'}).click();
-  assert.match(await page.locator('#rows').textContent(),/simulation/);
+  await expect(page.locator('#rows')).toContainText('simulation');
   await page.reload();
-  assert.match(await page.locator('#rows').textContent(),/simulation/);
+  await expect(page.locator('#rows')).toContainText('simulation');
   await page.screenshot({path:'release/windows-smoke.png'});
   await page.getByRole('link',{name:'Workbench',exact:true}).click();
   await desktop.evaluate(({dialog})=>{dialog.showMessageBoxSync=()=>0;});
