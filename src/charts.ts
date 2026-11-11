@@ -17,7 +17,9 @@ function chart(id:string,xLabel:string,yLabel:string,x0:number,x1:number,y0:numb
     g.fillStyle='#a4afb1';g.textAlign='center';g.fillText((x0+(x1-x0)*i/4).toFixed(x1-x0<5?1:0),sx,b+12);
     g.textAlign='right';g.fillText((y0+(y1-y0)*i/4).toFixed(y1-y0<=2?2:y1-y0<=20?1:0),l-5,sy+3);
   }
-  g.textAlign='left';g.fillText(yLabel,l,11);g.textAlign='center';g.fillText(xLabel,(l+r)/2,h-4);
+  g.textAlign='left';g.fillText(yLabel,l,11);
+  if(el('source').textContent?.startsWith('SIMULATION')){g.textAlign='right';g.fillStyle='#e8b778';g.fillText('SIMULATION',r,11);}
+  g.textAlign='center';g.fillText(xLabel,(l+r)/2,h-4);
   g.beginPath();g.rect(l,t,r-l,b-t);g.clip();
   return {g,x,y};
 }
