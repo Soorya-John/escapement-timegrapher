@@ -53,7 +53,14 @@ Buffers, audio imports, optional recordings, histories and backups have explicit
 
 The Actions workflow tests, builds, runs browser tests and deploys dist through the Pages artifact API. Repository Pages settings use GitHub Actions as the publishing source. All production asset, worker and worklet paths are relative to the repository subpath.
 
-Run locally with npm run build followed by node scripts/serve.mjs to exercise the same subpath as Pages.
+To preview the production build at the same subpath as Pages, run:
+
+~~~sh
+npm run build
+node scripts/serve.mjs
+~~~
+
+Open http://127.0.0.1:4173/escapement-timegrapher/ in your browser. The trailing slash is required; the server does not serve the root URL. Press Ctrl+C in the terminal to stop the server.
 
 ## Windows
 
